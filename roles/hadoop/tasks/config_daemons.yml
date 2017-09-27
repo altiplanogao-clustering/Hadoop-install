@@ -1,0 +1,82 @@
+---
+
+# Setup configuration varible
+- name: Setup configuration varible
+  set_fact:
+    hadoop_hosts:
+      slaves: "{{ groups['hdfs_slaves'] | union(groups['yarn_slaves']) | unique }}"
+      namenode_hostname: "{{ hostvars[groups['hdfs_namenode'][0]].hostname }}"
+      resource_mgr_hostname: "{{ hostvars[groups['yarn_resource_mgr'][0]].hostname }}"
+      web_proxyserver_hostname: "{{ hostvars[groups['yarn_proxyserver'][0]].hostname }}"
+      historyserver_hostname: "{{ hostvars[groups['historyserver'][0]].hostname }}"
+  when: cluster_mode
+
+
+- name: Present hadoop_conf_dir - {{ hadoop_conf_dir }}
+  file: path="{{ hadoop_conf_dir }}" state=directory
+- name: Create temporary hadoop_conf directory
+  tempfile: state=directory
+  register: hadoop_conf_temp
+- name: Copy config files to {{ hadoop_conf_temp.path }}
+  shell: |
+    cp -rf {{ hadoop_path }}/etc/hadoop/* {{ hadoop_conf_temp.path }}
+    rm {{ hadoop_conf_temp.path }}/core-site.xml
+    rm {{ hadoop_conf_temp.path }}/hdfs-site.xml
+    rm {{ hadoop_conf_temp.path }}/yarn-site.xml
+    rm {{ hadoop_conf_temp.path }}/mapred-site.xml
+    cp -rf {{ hadoop_conf_temp.path }}/* {{ hadoop_conf_dir }}
+- set_fact: template_dir="{{ cluster_mode | ternary('cluster', 'standalone') }}"
+- name: Configure daemons - {{ hadoop_conf_dir }}
+  template: src="{{ template_dir}}/{{ item.tplt }}" dest="{{ hadoop_conf_dir }}/{{ item.file }}"
+  when: item.cond
+  with_items:
+    - {tplt: core-site.xml.j2, file: core-site.xml, cond: true}
+    - {tplt: hdfs-site.xml.j2, file: hdfs-site.xml, cond: true}
+    - {tplt: yarn-site.xml.j2, file: yarn-site.xml, cond: true}
+    - {tplt: mapred-site.xml.j2, file: mapred-site.xml, cond: true}
+    - {tplt: slaves, file: slaves, cond: "{{ is_resource_mgr or is_namenode }}"}
+- name: Export HADOOP_CONF_DIR ...
+  lineinfile:
+    dest: /etc/environment
+    regexp: '^HADOOP_CONF_DIR='
+    line: HADOOP_CONF_DIR={{ hadoop_conf_dir }}
+- name: Export HADOOP_CONF_DIR ... (for RedHat)
+  lineinfile:
+    dest: "{{ sys_profile }}"
+    regexp: '^export HADOOP_CONF_DIR='
+    line: export HADOOP_CONF_DIR={{ hadoop_conf_dir }}
+#  when: ansible_os_family == "RedHat"
+
+# Setup user specified environment
+- name: Present HADOOP_LOG_DIR - /home/{{ hadoop_users }}/logs
+  file: path="/home/{{ item }}/logs" state=directory  owner="{{ item }}" group="{{ hadoop_group}}"
+  with_items: "{{ hadoop_users }}"
+- name: Present .pam_environment for - {{ hadoop_users }}
+  file: path="/home/{{ item }}/.pam_environment" state=touch owner={{ item }} group={{ hadoop_group }} mode=0644
+  with_items: "{{ hadoop_users }}"
+- name: Export LOG_DIR for - {{ hadoop_users }}
+  blockinfile:
+    dest: /home/{{ item }}/.pam_environment
+    marker: "# {mark} SPARK BLOCK"
+    backup: yes
+    block: |
+      HADOOP_LOG_DIR=/home/{{ item }}/logs
+      HDFS_LOG_DIR=/home/{{ item }}/logs
+      YARN_LOG_DIR=/home/{{ item }}/logs
+      HADOOP_MAPRED_LOG_DIR=/home/{{ item }}/logs
+  with_items: "{{ hadoop_users }}"
+- name: Export LOG_DIRs
+  blockinfile:
+    dest: /home/{{ item[1] }}/{{ item[0] }}
+    marker: "# {mark} SPARK BLOCK"
+    # path: /home/{{ item }}/{{ user_bashrc }}
+    backup: yes
+    block: |
+      export HADOOP_LOG_DIR=/home/{{ item[1] }}/logs
+      export HDFS_LOG_DIR=/home/{{ item[1] }}/logs
+      export YARN_LOG_DIR=/home/{{ item[1] }}/logs
+      export HADOOP_MAPRED_LOG_DIR=/home/{{ item[1] }}/logs
+  with_nested:
+    - "{{ user_env_files}}"
+    - "{{ hadoop_users }}"
+

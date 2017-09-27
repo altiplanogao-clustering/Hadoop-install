@@ -1,0 +1,60 @@
+---
+
+- name: check if namenode formatted
+  stat: path="{{ hadoop_vars.dfs_namenode_name_dir_no_protocol }}/current/VERSION"
+  register: namenodeversionfile
+- debug: msg="{{ hadoop_vars.dfs_namenode_name_dir_no_protocol }}/current/VERSION exist-{{ namenodeversionfile }}"
+  when: is_namenode
+
+- set_fact: script_path="/tmp/hadoop/"
+- name: prepare script directory
+  file: path="{{ script_path}}" owner={{ nobody}} group={{ nogroup}} mode=0777 state=directory
+- name: copy launch daemon script
+  copy: src='templates/scripts' dest="{{ script_path}}" owner={{ nobody }} group="{{ hadoop_group }}" mode=0755 directory_mode=0755
+- name: configure mapred demo script
+  template: src="templates/scripts/mapred_demo.sh" dest="{{ script_path}}/scripts/mapred_demo.sh" owner={{ nobody }} group="{{ hadoop_group }}" mode=0755 force=yes
+
+- name: format namenode
+  raw: su - {{ hdfs_user }} -l -c "{{ script_path}}/scripts/format_namenode.sh"
+  when: is_namenode and ( not namenodeversionfile.stat.exists )
+
+# - name: stop hdfs
+#   raw: "su - {{ hdfs_user }} -l -c \"$HADOOP_PREFIX/sbin/stop-dfs.sh\""
+#   when: is_namenode
+# - name: start hdfs
+#   raw: "su - {{ hdfs_user }} -l -c \"$HADOOP_PREFIX/sbin/start-dfs.sh\""
+#   when: is_namenode
+# - name: stop yarn
+#   raw: "su - {{ yarn_user }} -l -c \"$HADOOP_PREFIX/sbin/stop-yarn.sh\""
+#   when: is_resource_mgr
+# - name: start yarn
+#   raw: "su - {{ yarn_user }} -l -c \"$HADOOP_PREFIX/sbin/start-yarn.sh\""
+#   when: is_resource_mgr
+# - name: stop proxyserver
+#   raw: "su - {{ yarn_user }} -l -c \"$HADOOP_YARN_HOME/sbin/yarn-daemon.sh --config $HADOOP_CONF_DIR stop proxyserver\""
+#   when: (is_proxyserver is defined) and is_proxyserver
+# - name: start proxyserver
+#   raw: "su - {{ yarn_user }} -l -c \"$HADOOP_YARN_HOME/sbin/yarn-daemon.sh --config $HADOOP_CONF_DIR start proxyserver\""
+#   when: (is_proxyserver is defined) and is_proxyserver
+# - name: stop historyserver
+#   raw: "su - {{ mapred_user }} -l -c \"$HADOOP_PREFIX/sbin/mr-jobhistory-daemon.sh --config $HADOOP_CONF_DIR stop historyserver\""
+#   when: (is_historyserver is defined) and is_historyserver
+# - name: start historyserver
+#   raw: "su - {{ mapred_user }} -l -c \"$HADOOP_PREFIX/sbin/mr-jobhistory-daemon.sh --config $HADOOP_CONF_DIR start historyserver\""
+#   when: (is_historyserver is defined) and is_historyserver
+
+
+
+- name: start hdfs
+  raw: su - {{ hdfs_user }} -l -c "{{ script_path }}/scripts/start_hdfs.sh"
+  when: is_namenode
+- name: start yarn
+  raw: su - {{ yarn_user }} -l -c "{{ script_path }}/scripts/start_yarn.sh"
+  when: is_resource_mgr
+- name: run mapred demo
+  raw: su - {{ mapred_user }} -l -c "{{ script_path }}/scripts/mapred_demo.sh"
+  when: is_resource_mgr and run_demo
+  ignore_errors: yes
+
+
+

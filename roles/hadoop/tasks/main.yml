@@ -1,0 +1,32 @@
+---
+
+- setup:
+
+- name: os dependened vars
+  include_vars: '{{ item }}'
+  with_first_found:
+  - files:
+      - '{{ ansible_os_family }}.yml'
+      - 'default.yml'
+    paths: '{{ role_path }}/vars/os'
+
+- name: include deploy vars
+  include_vars:
+    file: "{{ role_path }}/vars/{{ cluster_mode | ternary('cluster_vars.yml','standalone_vars.yml') }}"
+    name: hadoop_vars
+
+- set_fact: is_namenode=true is_resource_mgr=true
+  when: not cluster_mode
+
+- name: Install the dependence packages
+  package: name="{{ item }}" state=present
+  with_items: '{{ hadoop_dependency }}'
+
+- import_tasks: config_users.yml
+- import_tasks: config_hosts.yml
+- import_tasks: config_firewall.yml
+- import_tasks: install_hadoop.yml
+- import_tasks: config_daemons.yml
+- include_tasks: launch_daemons.yml
+  when: start_on_finish
+

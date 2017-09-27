@@ -1,0 +1,17 @@
+---
+
+# Parameter:  users: []
+#             trustee: xxx
+
+- name: Read pub key
+  shell: cat /home/{{ item }}/.ssh/id_rsa.pub
+  register: pub_key_content
+  delegate_to: "{{ trustee }}"
+  become: true
+  changed_when: false
+  with_items: "{{ users }}"
+
+- authorized_key: user={{ item_foo.item }} key="{{ item_foo.stdout }}"
+  with_items: "{{ pub_key_content.results }}"
+  loop_control:
+    loop_var: item_foo

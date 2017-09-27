@@ -1,0 +1,80 @@
+---
+# Configure Users
+- name: Present Hadoop Group
+  group: name={{ hadoop_group }} state=present
+- name: Present Hadoop Users, "{{ hadoop_users | join(',') }}"
+  user: name={{ item }} comment={{ item}} group={{ hadoop_group }} shell=/bin/bash password='{{ hadoop_password }}'
+  with_items: "{{ hadoop_users }}"
+
+- name: Group main hadoop nodes
+  group_by:
+    key: hadoop_groups_is_main_node_{{ is_namenode or is_resource_mgr }}
+- debug: msg={{ group_names }}
+- name: Check is main hadoop node
+  debug: msg="Is main nodes{{ ':'}} {{ is_namenode }} {{ is_resource_mgr }} {{ 'hadoop_groups_is_main_node_True' in group_names }}"
+- name: Present ssh_key for "{{ hadoop_user }}"
+  user: name="{{ hadoop_user }}" generate_ssh_key=yes
+  when: "'hadoop_groups_is_main_node_True' in group_names"
+- name: Trust "{{ hadoop_user }}"
+  include_tasks: trust_a_host.yml users=['{{ hadoop_user }}'] trustee={{ node_item }}
+  with_items: "{{ groups['hadoop_groups_is_main_node_True'] }}"
+  loop_control:
+    loop_var: node_item
+
+- name: Group hadoop namenodes
+  group_by:
+    key: hadoop_groups_is_namenode_{{ is_namenode or is_secondarynamenode }}
+- name: Present ssh_key for "{{ hdfs_user }}"
+  user: name="{{ hdfs_user }}" generate_ssh_key=yes
+  when: "'hadoop_groups_is_namenode_True' in group_names"
+- name: Trust "{{ hdfs_user }}"
+  include_tasks: trust_a_host.yml users=['{{ hdfs_user }}'] trustee={{ node_item }}
+  with_items: "{{ groups['hadoop_groups_is_namenode_True'] }}"
+  loop_control:
+    loop_var: node_item
+
+- name: Group hadoop resource_mgr
+  group_by:
+    key: hadoop_groups_is_resource_mgr_{{ is_resource_mgr }}
+- name: Present ssh_key for "{{ yarn_user }}"
+  user: name="{{ yarn_user }}" generate_ssh_key=yes
+  when: "'hadoop_groups_is_resource_mgr_True' in group_names"
+- name: Trust "{{ yarn_user }}"
+  include_tasks: trust_a_host.yml users=['{{ yarn_user }}'] trustee={{ node_item }}
+  with_items: "{{ groups['hadoop_groups_is_resource_mgr_True'] }}"
+  loop_control:
+    loop_var: node_item
+
+- name: Group hadoop mapred entrance
+  group_by:
+    key: hadoop_groups_is_mapred_{{ true }}
+- name: Present ssh_key for "{{ mapred_user }}"
+  user: name="{{ mapred_user }}" generate_ssh_key=yes
+  when: "'hadoop_groups_is_mapred_True' in group_names"
+- name: Trust "{{ mapred_user }}"
+  include_tasks: trust_a_host.yml users=['{{ mapred_user }}'] trustee={{ node_item }}
+  with_items: "{{ groups['hadoop_groups_is_mapred_True'] }}"
+  loop_control:
+    loop_var: node_item
+
+
+#- group_by:
+#    key: hadoop_groups_is_resource_mgr_{{ is_resource_mgr }}
+
+# - authorized_key: user={{ item }} key="{{ lookup('file', '{{ role_path }}/{{ rcpath}}/sshkeys/{{ item }}_rsa.pub') }}"
+#   with_items: "{{ hadoop_users }}"
+# - name: configure user's ssh keys
+#   copy:
+#     src="{{ role_path }}/{{ rcpath }}/sshkeys/{{ item.key }}"
+#     dest="/home/{{ item.user }}/.ssh/{{ item.file }}"
+#     owner="{{ item.user }}" group="{{ hadoop_group }}" mode=0600
+# #  when: item.cond
+#   with_items:
+#     - {key: hadoop_rsa, file: id_rsa, user: "{{ hadoop_user }}", cond: "{{ is_resource_mgr or is_namenode }}" }
+#     - {key: hdfs_rsa, file: id_rsa, user: "{{ hdfs_user }}", cond: "{{ is_namenode }}"}
+#     - {key: yarn_rsa, file: id_rsa, user: "{{ yarn_user }}", cond: "{{ is_resource_mgr }}"}
+#     - {key: mapred_rsa, file: id_rsa, user: "{{ mapred_user }}", cond: true}
+#     - {key: hadoop_rsa.pub, file: id_rsa.pub, user: "{{ hadoop_user }}", cond: true}
+#     - {key: hdfs_rsa.pub, file: id_rsa.pub, user: "{{ hdfs_user }}", cond: true}
+#     - {key: yarn_rsa.pub, file: id_rsa.pub, user: "{{ yarn_user }}", cond: true}
+#     - {key: mapred_rsa.pub, file: id_rsa.pub, user: "{{ mapred_user }}", cond: true}

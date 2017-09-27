@@ -1,0 +1,13 @@
+rcpath: resources
+
+is_namenode: true
+is_secondarynamenode: true
+is_datanode: true
+
+is_resource_mgr: true
+is_node_mgr: true
+is_proxyserver: true
+is_historyserver: true
+
+is_hdfs: true
+is_yarn: true

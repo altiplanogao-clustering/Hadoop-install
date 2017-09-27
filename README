@@ -1,0 +1,6 @@
+Install mode:
+	Standalone Mode:
+		1 Node (Master + Slave)
+			CMD: ansible-playbook -i inventories/standalone spark_standalone.yml
+		N Nodes (1 Master + (N-1) Slaves)
+			CMD: ansible-playbook -i inventories/standalone spark_standalone.yml

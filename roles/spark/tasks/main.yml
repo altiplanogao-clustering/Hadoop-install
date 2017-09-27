@@ -1,0 +1,14 @@
+---
+
+- name: Present spark_install_dir
+  file: path="{{ spark_conf.install_dir }}" state=directory
+
+- debug: msg="slaves hostnames {{ groups['slaves'] | default([]) }}, standalone {{ standalone }}"
+
+- set_fact:
+    spark_res: "{{ with_hadoop | default(true) | ternary(spark_conf.with_hadoop , spark_conf.no_hadoop ) }}"
+- import_tasks: install_spark.yml spark_res='{{ spark_res }}'
+
+- import_tasks: config_spark.yml
+- include_tasks: launch_daemons.yml
+  when: start_on_finish

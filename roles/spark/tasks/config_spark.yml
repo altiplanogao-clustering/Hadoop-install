@@ -1,0 +1,95 @@
+---
+
+- group:
+    name: '{{ spark_group }}'
+    state: present
+- user:
+    name: "{{ item }}"
+    groups: ["{{ sudo_group }}", '{{ spark_group }}']
+    shell: /bin/bash
+    append: yes
+  with_items: "{{ spark_users }}"
+
+- name: mkdir spark_conf_dir
+  file: path="{{ spark_conf_dir }}" state=directory
+
+- name: Check standalone config mode
+  block:
+    - set_fact:
+        masters_count: '{{ groups["masters"] | default([]) | length }}'
+        config_mode: "ha-cluster"
+    - set_fact:
+        config_mode: "single"
+      when: masters_count == '0'
+    - set_fact:
+        config_mode: "cluster"
+      when: masters_count == '1'
+    - debug: msg="Master count {{ masters_count }}, Config mode is {{ config_mode }}"
+    - set_fact:
+        # zk_url: "{{ groups['zk'] | map('extract', hostvars, 'hostname') | list | join(',')  | regex_replace('^(([^,]{1,}),)*(([^,]{1,}){1})$', '\\2:2181,\\3:2181') }}"
+        zk_url: "{{ groups['zk'] | map('extract', hostvars, 'hostname') | list | join(',')  | regex_replace('([^,]{1,})', '\\1:2181') }}"
+      when: config_mode == "ha-cluster"
+  when: standalone
+
+- name: Present spark_deploy_zookeeper_dir
+  file: path="{{ spark_deploy_zookeeper_dir }}" state=directory  mode=0777
+
+- name: Config standalone mode
+  block:
+    - name: Copy common conf
+      template: src='{{ item.src }}' dest="{{ spark_conf_dir }}/{{ item.path | regex_replace('(\.template)?$') }}" mode='{{ item.mode }}'
+      with_filetree: "templates/standalone/common"
+    - set_fact: template_dir="templates/standalone/{{ config_mode }}"
+    - name: Copy standalone conf
+      template: src='{{ item.src }}' dest="{{ spark_conf_dir }}/{{ item.path | regex_replace('(\.template)?$') }}" mode='{{ item.mode }}'
+      with_filetree: '{{ template_dir}}/'
+  when: standalone
+
+- name: Config password-less
+  block: 
+    - name: Config password-less from localhost
+      include_tasks: passwordless/localhost.yml users={{ spark_users }}
+      when: config_mode == 'single'
+    - name: Config password-less from master
+      include_tasks: passwordless/from_master.yml users={{ spark_users }}
+      when: (config_mode == 'cluster') or (config_mode == 'ha-cluster')
+  when: standalone
+
+- name: export SPARK_CONF_DIR
+  lineinfile:
+    dest: /etc/environment
+    regexp: '^SPARK_CONF_DIR='
+    line: SPARK_CONF_DIR={{ spark_conf_dir }}
+- name: export SPARK_CONF_DIR ...
+  lineinfile:
+    dest: "{{ sys_profile }}"
+    regexp: '^export SPARK_CONF_DIR='
+    line: export SPARK_CONF_DIR={{ spark_conf_dir }}
+
+# Setup user specified environment
+- name: mkdir SPARK_LOG_DIR
+  file: path="/home/{{ item }}/logs" state=directory  owner="{{ item }}" group="{{ spark_group}}"
+  with_items: "{{ spark_users }}"
+- file: path="/home/{{ item }}/.pam_environment" state=touch owner={{ item }} group={{ spark_group }} mode=0644
+  with_items: "{{ spark_users }}"
+- name: export LOG_DIRs
+  blockinfile:
+    dest: /home/{{ item }}/.pam_environment
+    marker: "# {mark} SPARK BLOCK"
+    block: |
+      SPARK_PID_DIR=/home/{{ item }}/logs
+      SPARK_LOG_DIR=/home/{{ item }}/logs
+      SPARK_WORKER_DIR=/home/{{ item }}/spark_worker
+  with_items: "{{ spark_users }}"
+- name: export LOG_DIRs
+  blockinfile:
+    dest: /home/{{ item[1] }}/{{ item[0] }}
+    marker: "# {mark} SPARK BLOCK"
+    block: |
+      export SPARK_PID_DIR=/home/{{ item[1] }}/logs
+      export SPARK_LOG_DIR=/home/{{ item[1] }}/logs
+      export SPARK_WORKER_DIR=/home/{{ item[1] }}/spark_worker
+  with_nested:
+    - "{{ user_env_files}}"
+    - "{{ spark_users }}"
+

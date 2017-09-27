@@ -1,0 +1,67 @@
+---
+
+- set_fact:
+    hadoop_path: '{{ pkg_ic.install_path }}/{{ pkg_ic.basename}}'
+# delete hadoop installation, configuration and data
+- name: Present hadoop installation path - {{ pkg_ic.install_path }}
+  file: path="{{ pkg_ic.install_path }}" state=directory
+- name: Delete hadoop installation - {{ hadoop_path }}
+  file: path="{{ hadoop_path }}" state=absent
+  when: fresh_unzip | default(true)
+- name: Delete hadoop_conf_dir - {{ hadoop_conf_dir }}
+  file: path="{{ hadoop_conf_dir }}" state=absent
+  when: fresh_unzip | default(true)
+- name: Delete hadoop-data
+  file: path="/home/{{ item[0] }}/{{ item[1]}}" state=absent
+  when: drop_data | default(true)
+  with_nested:
+    - "{{ hadoop_users }}"
+    - ['hadoop-data','logs']
+
+- name: Download {{ pkg_ic.file }}
+  cached_get_url:
+    cached: "{{ resource_cache }}/{{ pkg_ic.file }}"
+    url: "{{ pkg_ic.url }}"
+    dest: '{{ pkg_ic.install_path }}/{{ pkg_ic.file }}'
+- name: Unarchive package - {{ pkg_ic.install_path }}
+  unarchive:
+    src: "{{ pkg_ic.install_path }}/{{ pkg_ic.file }}"
+    dest: "{{ pkg_ic.install_path }}"
+    remote_src: yes
+
+# export HADOOP environment variables
+- name: export HADOOP_HOME, HADOOP_PREFIX ...
+  blockinfile:
+    path: /etc/environment
+    marker: "# {mark} HADOOP BLOCK"
+    block: |
+      HADOOP_HOME={{ hadoop_path }}
+      HADOOP_PREFIX={{ hadoop_path }}
+      HADOOP_HDFS_HOME={{ hadoop_path }}
+      HADOOP_YARN_HOME={{ hadoop_path }}
+- name: export HADOOP_HOME, HADOOP_PREFIX ... (for RedHat)
+  blockinfile:
+    path: "{{ sys_profile }}"
+    marker: "# {mark} HADOOP BLOCK"
+    block: |
+      export HADOOP_HOME={{ hadoop_path }}
+      export HADOOP_PREFIX={{ hadoop_path }}
+      export HADOOP_HDFS_HOME={{ hadoop_path }}
+      export HADOOP_YARN_HOME={{ hadoop_path }}
+
+#  when: ansible_os_family == "RedHat"
+- name: export HADOOP_HOME to PATH
+  lineinfile:
+    dest: '{{ sys_profile }}'
+    line: 'export PATH=$PATH:$HADOOP_HOME/bin'
+- name: fetch JAVA_HOME
+  command: /bin/bash -l -c "echo $JAVA_HOME"
+  changed_when: false
+  register: fetch_java_home
+- debug: msg="JAVA_HOME={{ fetch_java_home.stdout}}"
+- name: set hadoop JAVA_HOME
+  lineinfile:
+    dest: "{{ hadoop_path }}/etc/hadoop/hadoop-env.sh"
+    regexp: '^export JAVA_HOME='
+    line: 'export JAVA_HOME={{ fetch_java_home.stdout}}'
+

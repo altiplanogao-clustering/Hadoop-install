@@ -1,0 +1,13 @@
+---
+fresh_unzip: true
+with_hadoop: false
+standalone: false
+start_on_finish: true
+
+spark_conf_dir: /etc/spark/conf
+
+spark_group: spark
+spark_users:
+  - '{{ ansible_user }}'
+
+spark_deploy_zookeeper_dir: /var/lib/spark_zookeeper

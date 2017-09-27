@@ -1,0 +1,9 @@
+---
+resource_cache: "{{ playbook_dir | dirname }}/.resources"
+
+spark_group: spark
+spark_users:
+  - '{{ ansible_user }}'
+  - 'andy'
+
+spark_deploy_zookeeper_dir: /var/lib/spark_zookeeper

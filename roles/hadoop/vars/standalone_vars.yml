@@ -1,0 +1,6 @@
+---
+
+dfs_namenode_name_dir_no_protocol: "/home/{{ hdfs_user }}/hadoop-data/hdfs/namenode"
+dfs_namenode_name_dir: "file:///home/{{ hdfs_user }}/hadoop-data/hdfs/namenode"
+dfs_datanode_data_dir: "file:///home/{{ hdfs_user }}/hadoop-data/hdfs/datanode"
+

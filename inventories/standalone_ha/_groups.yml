@@ -1,0 +1,15 @@
+---
+
+# https://gist.github.com/sivel/3c0745243787b9899486
+# ansible_connection: ssh
+group_default_vars: {}
+
+groups:
+  - name: zk
+    hosts: [node_00, node_01, node_02]
+  - name: masters
+    hosts: [node_00, node_01]
+  - name: slaves
+    hosts: [node_03, node_04, node_05]
+  - name: spark_nodes
+    children: [masters, slaves]

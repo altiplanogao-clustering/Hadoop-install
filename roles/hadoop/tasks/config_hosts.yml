@@ -1,0 +1,36 @@
+---
+  # when: cluster_mode
+
+
+# Configure ~user/.ssh/known_hosts
+- name: Ssh-keyscan {{ ":" }} localhost
+  shell: ssh-keyscan -t rsa {{ item}}
+  changed_when: false
+  register: keyscan_localhost
+  with_items: ['0.0.0.0', 'localhost']
+- name: Update known_hosts {{ ":" }} add localhost
+  lineinfile: dest=/home/{{ hadoop_user }}/.ssh/known_hosts create=yes state=present owner={{ hadoop_user }} group={{ hadoop_group }} line="{{ item.stdout }}" regexp="^{{ item.item }}"
+  with_items: "{{ keyscan_localhost.results }}"
+  no_log: true
+
+- name: Ssh-keyscan {{ ":" }} hostnames
+  shell: ssh-keyscan -t rsa {{ hostvars[item].hostname }}
+  with_items: "{{ play_hosts }}"
+  changed_when: false
+  register: keyscans
+  when: cluster_mode
+- name: Update known_hosts {{ ":" }} add hostnames
+  lineinfile: dest=/home/{{ hadoop_user }}/.ssh/known_hosts create=yes state=present owner={{ hadoop_user }} group={{ hadoop_group }} line="{{ item.stdout }}" regexp="^{{ hostvars[item.item].hostname }}"
+  with_items: "{{ keyscans.results }}"
+  when: cluster_mode
+  no_log: true
+- name: Copy known_hosts, from {{ hadoop_user }} to {{ hdfs_user }},{{ yarn_user }},{{ mapred_user }}
+  shell: |
+    cp -f /home/{{ hadoop_user }}/.ssh/known_hosts /home/{{ item }}/.ssh/known_hosts
+    chown {{ item}}:{{ hadoop_group}} /home/{{ item }}/.ssh/known_hosts
+  with_items:
+    - "{{ hdfs_user }}"
+    - "{{ yarn_user }}"
+    - "{{ mapred_user }}"
+  changed_when: false
+

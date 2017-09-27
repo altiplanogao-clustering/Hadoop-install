@@ -1,0 +1,18 @@
+---
+
+cluster_mode: false
+drop_data: false
+fresh_unzip: true
+start_on_finish: true
+run_demo: false
+
+# passw0rd
+hadoop_password: $6$VKqoODAnoEqhS$QhuYlkAChxm5P1FLgrPXJO4OrdM/qRBsfnBr6Jsfw18GserWNBSJ5kKl64nX9ouqdnBeGSzjMSd5z1SfFMgpE1
+
+pkg_ic:
+  name: hadoop
+  install_path: /usr/lib/hadoop
+  url: http://apache.mirrors.tds.net/hadoop/common/hadoop-2.8.1/hadoop-2.8.1.tar.gz
+  file: hadoop-2.8.1.tar.gz
+  basename: hadoop-2.8.1
+  version: 2.8.1

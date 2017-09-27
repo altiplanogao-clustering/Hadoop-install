@@ -1,0 +1,40 @@
+---
+
+# - name: Prepare
+#   hosts: local
+#   vars:
+#     init: true
+#   roles:
+#     - hadoop
+
+- name: Install standalone hadoop
+  hosts: hadoop_cluster
+  become: yes
+  become_method: sudo
+  vars_files:
+    - ./vars/config.yml
+  roles:
+    - basic/system
+    - { role: basic/hosts }
+    - basic/sources
+    - jdk
+    - { role: hadoop, cluster_mode: true, drop_data: true, fresh_unzip: false, start_on_finish: true, run_demo: true }
+
+# - name: Install hadoop cluster
+#   hosts: hadoop_cluster
+#   become: yes
+#   become_method: sudo
+#   vars_files:
+#     - ./vars/config.yml
+#   vars:
+#     fresh_unzip: false
+#     drop_data: true
+#   roles: 
+#     - basic/system
+#     - basic/common
+#     - basic/hosts
+#     - basic/sources
+#     - jdk
+#     - hadoop
+#     - spark
+#     - mesos

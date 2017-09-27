@@ -1,0 +1,14 @@
+---
+
+- name: fetch JAVA_HOME, setup if absent
+  command: /bin/sh -l -c "echo $JAVA_HOME"
+  register: fetch_java_home
+  changed_when: False
+
+- debug: msg="os{{ ':'}}{{ ansible_os_family }}, distribution{{ ':'}}{{ ansible_distribution }}-{{ ansible_distribution_version }}({{ ansible_distribution_release }}), JAVA_HOME{{ ':'}}{{ fetch_java_home.stdout }}, {{ pkg_ic}}"
+
+- include_tasks: install_from_repo.yml
+  when: ( pkg_ic.repo_install  ) and (fetch_java_home.stdout == '')
+
+- include_tasks: install_from_tar.yml
+  when: fetch_java_home.stdout == ''
