@@ -17,4 +17,4 @@
   with_items: "{{ pub_key_content.results }}"
   loop_control:
     loop_var: item_foo
-  no_log: true
+    label: "{{ item_foo.item }}"

@@ -9,9 +9,6 @@
 - name: Group main hadoop nodes
   group_by:
     key: hadoop_groups_is_main_node_{{ is_namenode or is_resource_mgr }}
-- debug: msg={{ group_names }}
-- name: Check is main hadoop node
-  debug: msg="Is main nodes{{ ':'}} {{ is_namenode }} {{ is_resource_mgr }} {{ 'hadoop_groups_is_main_node_True' in group_names }}"
 - name: Present ssh_key for "{{ hadoop_user }}"
   user: name="{{ hadoop_user }}" generate_ssh_key=yes
   when: "'hadoop_groups_is_main_node_True' in group_names"

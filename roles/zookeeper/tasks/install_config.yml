@@ -2,26 +2,27 @@
 
 - name: Present install path '{{ "[" }}{{ pkg_ic.install_path }}{{ "]" }}'
   file: path="{{ pkg_ic.install_path }}" state=directory
-- name: Download {{ pkg_ic.file }}
+- name: Download {{ pkg_ic.file }} - {{ pkg_ic.install_path }}/{{ pkg_ic.file }}
   cached_get_url:
     cached: "{{ resource_cache }}/{{ pkg_ic.file }}"
     url: "{{ pkg_ic.url }}"
     dest: '{{ pkg_ic.install_path }}/{{ pkg_ic.file }}'
-- name: 'Unarchive package'
+- name: Unarchive package - {{ pkg_ic.install_path }}
   unarchive:
     src: "{{ pkg_ic.install_path }}/{{ pkg_ic.file }}"
     dest: "{{ pkg_ic.install_path }}"
     remote_src: yes
 
 
-- name: Present zookeeper_data_dir
+- name: Present zookeeper_data_dir - {{ zookeeper_data_dir }}
   file: path="{{ zookeeper_data_dir }}" state=directory mode=0777
 - name: Zoo.cfg
   template:
     src: zoo.cfg
     dest: "{{ pkg_ic.install_path }}/{{ pkg_ic.basename }}/conf/zoo.cfg"
     mode: 0644
-- template:
+- name: Config Zk myid
+  template:
     src: myid
     dest: "{{ zookeeper_data_dir }}/myid"
     mode: 0664

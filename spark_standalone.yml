@@ -1,6 +1,6 @@
 ---
 
-- name: Install standalone hadoop
+- name: Pre-setup
   hosts: spark_nodes:zk
   become: yes
   become_method: sudo
@@ -14,7 +14,7 @@
     - jdk
     - zookeeper
 
-- name: Install standalone hadoop
+- name: Setup Spark
   hosts: spark_nodes
   become: yes
   become_method: sudo

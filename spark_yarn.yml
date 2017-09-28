@@ -7,7 +7,7 @@
 #   roles:
 #     - hadoop
 
-- name: Install standalone hadoop
+- name: Install Hadoop
   hosts: hadoop_cluster
   become: yes
   become_method: sudo
@@ -20,6 +20,18 @@
     - jdk
     - { role: hadoop, cluster_mode: true, drop_data: true, fresh_unzip: false, start_on_finish: true, run_demo: true }
 
+- name: Install Spark
+  hosts: spark_nodes
+  become: yes
+  become_method: sudo
+  vars_files:
+    - ./vars/config.yml
+  roles:
+    - basic/system
+    # - basic/hosts
+    # - basic/sources
+    # - jdk
+    - { role: spark, with_hadoop: true, standalone: false, fresh_unzip: false }
 # - name: Install hadoop cluster
 #   hosts: hadoop_cluster
 #   become: yes

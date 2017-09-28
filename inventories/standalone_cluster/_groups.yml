@@ -8,6 +8,6 @@ groups:
   - name: masters
     hosts: [node_00]
   - name: slaves
-    hosts: [node_01, node_02, node_03, node_04]
+    hosts: [node_01, node_02]
   - name: spark_nodes
     children: [masters, slaves]

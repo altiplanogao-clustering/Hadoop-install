@@ -6,4 +6,4 @@ group_default_vars: {}
 
 groups:
   - name: spark_nodes
-    hosts: [node_00, node_01, node_02, node_03, node_04]
+    hosts: [node_00]

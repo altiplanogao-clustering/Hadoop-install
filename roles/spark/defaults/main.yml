@@ -1,4 +1,7 @@
 ---
+# standalone, yarn, mesos?
+deploy_mode: standalone
+
 fresh_unzip: true
 with_hadoop: false
 standalone: false

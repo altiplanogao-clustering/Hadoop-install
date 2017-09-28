@@ -29,4 +29,6 @@ groups:
   - name: hadoop_cluster
     children: [hdfs, yarn]
 
+  - name: spark_nodes
+    hosts: [node_00]
 

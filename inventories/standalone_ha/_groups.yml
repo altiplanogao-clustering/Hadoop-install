@@ -6,10 +6,10 @@ group_default_vars: {}
 
 groups:
   - name: zk
-    hosts: [node_00, node_01, node_02]
+    hosts: [node_03, node_04, node_05]
   - name: masters
     hosts: [node_00, node_01]
   - name: slaves
-    hosts: [node_03, node_04, node_05]
+    hosts: [node_02, node_03, node_04]
   - name: spark_nodes
     children: [masters, slaves]
