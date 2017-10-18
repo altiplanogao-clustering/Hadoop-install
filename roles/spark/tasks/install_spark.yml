@@ -28,13 +28,8 @@
     src: "{{ spark_ic.install_path }}/{{ spark_ic.file }}"
     dest: "{{ spark_ic.install_path }}"
     remote_src: yes
-# - name: download and unzip
-#   include_role:
-#     name: basic/download_and_unzip
-#   vars:
-#     pkg_conf: '{{ spark_ic }}'
 
-# export HADOOP environment variables
+# export SPARK_HOME environment variables
 - name: Export SPARK_HOME ...
   blockinfile:
     path: /etc/environment
@@ -48,19 +43,8 @@
     block: |
       export SPARK_HOME={{ spark_path }}
 
-#  when: ansible_os_family == "RedHat"
+#  export SPARK_HOME to PATH
 - name: Export SPARK_HOME to PATH
   lineinfile:
     dest: '{{ sys_profile }}'
     line: 'export PATH=$PATH:$SPARK_HOME/bin'
-# - name: fetch JAVA_HOME
-#   command: /bin/bash -l -c "echo $JAVA_HOME"
-#   changed_when: false
-#   register: fetch_java_home
-# - debug: msg="JAVA_HOME={{ fetch_java_home.stdout}}"
-# - name: set spark JAVA_HOME
-#   lineinfile:
-#     dest: "{{ spark_path }}/etc/spark/spark-env.sh"
-#     regexp: '^export JAVA_HOME='
-#     line: 'export JAVA_HOME={{ fetch_java_home.stdout}}'
-

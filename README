@@ -2,5 +2,9 @@ Install mode:
 	Standalone Mode:
 		1 Node (Master + Slave)
 			CMD: ansible-playbook -i inventories/standalone spark_standalone.yml
-		N Nodes (1 Master + (N-1) Slaves)
-			CMD: ansible-playbook -i inventories/standalone spark_standalone.yml
+		cluster: N Nodes (1 Master + (N-1) Slaves)
+			CMD: ansible-playbook -i inventories/standalone_cluster spark_standalone.yml
+		cluster with ha: N Nodes (x zookeepers + y Masters + z Slaves)
+			CMD: ansible-playbook -i inventories/standalone_ha spark_standalone.yml
+	Run on yarn
+		CMD: ansible-playbook -i inventories/on-yarn spark_yarn.yml
