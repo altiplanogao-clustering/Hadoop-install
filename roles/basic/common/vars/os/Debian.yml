@@ -1,3 +1,4 @@
 dependency:
-  - ssh
+  - openssh-client
+  - openssh-server
   - rsync

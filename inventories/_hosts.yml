@@ -8,22 +8,22 @@ host_default_vars:
 hosts:
   node_00:
     hostname: cluster-node-00
-    address: 192.168.101.100
+    address: 192.168.102.100
   node_01:
     hostname: cluster-node-01
-    address: 192.168.101.101
+    address: 192.168.102.101
   node_02:
     hostname: cluster-node-02
-    address: 192.168.101.102
+    address: 192.168.102.102
   node_03:
     hostname: cluster-node-03
-    address: 192.168.101.103
+    address: 192.168.102.103
   node_04:
     hostname: cluster-node-04
-    address: 192.168.101.104
+    address: 192.168.102.104
   node_05:
     hostname: cluster-node-05
-    address: 192.168.101.105
+    address: 192.168.102.105
 
 
 

@@ -6,39 +6,37 @@
   user: name={{ item }} comment={{ item}} group={{ hadoop_group }} shell=/bin/bash password='{{ hadoop_password }}'
   with_items: "{{ hadoop_users }}"
 
-- name: Group main hadoop nodes
-  group_by:
-    key: hadoop_groups_is_main_node_{{ is_namenode or is_resource_mgr }}
+- name: List hadoop nodes
+  set_fact:
+    _hadoop_nodes:
+      main: '{{ hostvars | hosts_with("is_namenode", True) | union ( hostvars | hosts_with("is_resource_mgr", True)) }}'
+      namenodes: '{{ hostvars | hosts_with("is_namenode", True) | union ( hostvars | hosts_with("is_secondarynamenode", True)) }}'
+      resource_mgrs: '{{ hostvars | hosts_with("is_resource_mgr", True) }}'
+
 - name: Present ssh_key for "{{ hadoop_user }}"
   user: name="{{ hadoop_user }}" generate_ssh_key=yes
-  when: "'hadoop_groups_is_main_node_True' in group_names"
+  when: inventory_hostname in _hadoop_nodes.main
 - name: Trust "{{ hadoop_user }}"
   include_tasks: trust_a_host.yml users=['{{ hadoop_user }}'] trustee={{ node_item }}
-  with_items: "{{ groups['hadoop_groups_is_main_node_True'] }}"
+  with_items: "{{ _hadoop_nodes.main }}"
   loop_control:
     loop_var: node_item
 
-- name: Group hadoop namenodes
-  group_by:
-    key: hadoop_groups_is_namenode_{{ is_namenode or is_secondarynamenode }}
 - name: Present ssh_key for "{{ hdfs_user }}"
   user: name="{{ hdfs_user }}" generate_ssh_key=yes
-  when: "'hadoop_groups_is_namenode_True' in group_names"
+  when: inventory_hostname in _hadoop_nodes.namenodes
 - name: Trust "{{ hdfs_user }}"
   include_tasks: trust_a_host.yml users=['{{ hdfs_user }}'] trustee={{ node_item }}
-  with_items: "{{ groups['hadoop_groups_is_namenode_True'] }}"
+  with_items: "{{ _hadoop_nodes.namenodes }}"
   loop_control:
     loop_var: node_item
 
-- name: Group hadoop resource_mgr
-  group_by:
-    key: hadoop_groups_is_resource_mgr_{{ is_resource_mgr }}
 - name: Present ssh_key for "{{ yarn_user }}"
   user: name="{{ yarn_user }}" generate_ssh_key=yes
-  when: "'hadoop_groups_is_resource_mgr_True' in group_names"
+  when: inventory_hostname in _hadoop_nodes.resource_mgrs
 - name: Trust "{{ yarn_user }}"
   include_tasks: trust_a_host.yml users=['{{ yarn_user }}'] trustee={{ node_item }}
-  with_items: "{{ groups['hadoop_groups_is_resource_mgr_True'] }}"
+  with_items: "{{ _hadoop_nodes.resource_mgrs }}"
   loop_control:
     loop_var: node_item
 
