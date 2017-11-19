@@ -1,5 +1,5 @@
 ---
-resource_cache: "{{ playbook_dir | dirname }}/.resources"
+resource_cache: "{{ lookup('env','HOME') }}/.resources"
 
 spark_group: spark
 spark_users:
