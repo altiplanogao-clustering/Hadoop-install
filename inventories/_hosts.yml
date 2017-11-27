@@ -24,6 +24,9 @@ hosts:
   node_05:
     hostname: cluster-node-05
     address: 192.168.102.105
+  node_06:
+    hostname: cluster-node-06
+    address: 192.168.102.106
 
 
 

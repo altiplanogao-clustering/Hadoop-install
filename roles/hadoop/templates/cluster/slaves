@@ -1,3 +1,0 @@
-{% for node in hadoop_hosts.slaves %}
-{{ hostvars[node].hostname }}
-{% endfor %}

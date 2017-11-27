@@ -8,3 +8,4 @@ nogroup: nogroup
 hadoop_dependency:
   - ssh
   - rsync
+  - python

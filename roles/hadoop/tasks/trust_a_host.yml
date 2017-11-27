@@ -2,19 +2,21 @@
 
 # Parameter:  users: []
 #             trustee: xxx
+#             guests: []
 
-- name: Read users[{{ users | join(',') }}]' pub key from [{{ trustee }}]
+- name: ({{ Scope }}) Read users[{{ users | join(',') }}]' pub key from [{{ trustee }}]
   shell: cat /home/{{ item }}/.ssh/id_rsa.pub
   register: pub_key_content
   delegate_to: "{{ trustee }}"
   become: true
   changed_when: false
   with_items: "{{ users }}"
-  run_once: true
+  # run_once: true
 
-- name: Trust users[{{ users | join(',') }}] from [{{ trustee }}]
-  authorized_key: user={{ item_foo.item }} key="{{ item_foo.stdout }}"
+- name: ({{ Scope }}) Trust users[{{ users | join(',') }}] from [{{ trustee }}] to [{{ guests | join(',') }}]
+  authorized_key: user={{ user_item.item }} key="{{ user_item.stdout }}"
   with_items: "{{ pub_key_content.results }}"
   loop_control:
-    loop_var: item_foo
-    label: "{{ item_foo.item }}"
+    loop_var: user_item
+    label: "{{ user_item.item }}"
+  when: inventory_hostname in guests

@@ -5,7 +5,10 @@ is_datanode: false
 is_resource_mgr: false
 is_node_mgr: false
 is_proxyserver: false
-is_historyserver: false
 
 is_hdfs: false
 is_yarn: false
+
+is_mr_client: false
+is_historyserver: false
+is_mr: false

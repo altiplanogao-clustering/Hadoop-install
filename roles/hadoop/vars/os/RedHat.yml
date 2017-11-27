@@ -9,5 +9,6 @@ hadoop_dependency:
   - openssh-server
   - openssh-clients
   - rsync
+  - python
   # - telnet
   # - net-tools

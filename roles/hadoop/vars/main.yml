@@ -1,35 +1,45 @@
 ---
 
-hadoop_group: hadoop
-
-hadoop_user: hadoop
-hdfs_user: hdfs
-yarn_user: yarn
-mapred_user: mapred
-
-hadoop_users:
-  - hadoop
-  - hdfs
-  - yarn
-  - mapred
-
-#hadoop_path = hadoop_dirname + hadoop_basename
-# hadoop_path: /usr/lib/hadoop/{{ hadoop_basename }}
-hadoop_conf_dir: /etc/hadoop/conf
-
 hadoop_conf:
-  download_27_url: http://mirrors.advancedhosters.com/apache/hadoop/common/hadoop-2.7.3/hadoop-2.7.3.tar.gz
-  download_27_checksum_sha256: sha256:D489DF3808244B906EB38F4D081BA49E50C4603DB03EFD5E594A1E98B09259C2
-  download_27_checksum_md5: md5:3455BB57E4B4906BBEA67B58CCA78FA8
+  group: hadoop
+  group_id: 2000
+  users:
+    hadoop:
+      name: hadoop
+      id: 2001
+    hdfs:
+      name: hdfs
+      id: 2002
+    yarn:
+      name: yarn
+      id: 2003
+    mapred:
+      name: mapred
+      id: 2004
+  user_list:
+    - hadoop
+    - hdfs
+    - yarn
+    - mapred
+  hdfs_users:
+    - hadoop
+    - hdfs
+  yarn_users:
+    - hadoop
+    - yarn
+  mapred_users:
+    - hadoop
+    - mapred
+  hostchecking: true
+  cluster_name: cluster_x
+  namenode_name_dir: /home/hdfs/name
+  datanode_data_dir: /home/hdfs/data
+  hadoop_conf_dir: /etc/hadoop
+  hadoop_log_dir: /var/hadoop/hadoop/logs
+  hadoop_yarn_log_dir: /var/hadoop/yarn/logs
+  hadoop_mapred_log_dir: /var/hadoop/mapred/logs
+  script_dir: /hadoop-script
 
-  download_28_url: http://apache.mirrors.tds.net/hadoop/common/hadoop-2.8.1/hadoop-2.8.1.tar.gz
-  download_28_checksum_sha256: sha256:B5BE527578EF2C8565CD435AB4AE71A024CAD704F7BF597BD792082703BD77D9
-  download_28_checksum_md5: md5:DEF2211EE1561871794E1B0EEC8CB628
 
-  download_url: http://apache.mirrors.tds.net/hadoop/common/hadoop-2.8.1/hadoop-2.8.1.tar.gz
-  download_checksum_sha256: sha256:B5BE527578EF2C8565CD435AB4AE71A024CAD704F7BF597BD792082703BD77D9
-  download_checksum_md5: md5:DEF2211EE1561871794E1B0EEC8CB628
-  tar_file: hadoop-2.8.1.tar.gz
-  basename: hadoop-2.8.1
-  version: 2.8.1
+
 

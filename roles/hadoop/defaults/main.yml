@@ -11,8 +11,8 @@ hadoop_password: $6$VKqoODAnoEqhS$QhuYlkAChxm5P1FLgrPXJO4OrdM/qRBsfnBr6Jsfw18Gse
 
 pkg_ic:
   name: hadoop
-  install_path: /usr/lib/hadoop
-  url: http://apache.mirrors.tds.net/hadoop/common/hadoop-2.8.1/hadoop-2.8.1.tar.gz
-  file: hadoop-2.8.1.tar.gz
-  basename: hadoop-2.8.1
-  version: 2.8.1
+  install_path: /usr/lib
+  url: http://www-eu.apache.org/dist/hadoop/common/hadoop-2.8.2/hadoop-2.8.2.tar.gz
+  file: hadoop-2.8.2.tar.gz
+  basename: hadoop-2.8.2
+  version: 2.8.2

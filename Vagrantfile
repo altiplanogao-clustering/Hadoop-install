@@ -12,8 +12,8 @@ SUPPORTED_OS = {
 }
 
 $subnet = "192.168.102"
-$num_instances = 6
-$vm_memory = 2048
+$num_instances = 7
+$vm_memory = 1024
 $vm_cpus = 1
 $instance_name_prefix = "spark"
 
