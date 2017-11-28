@@ -15,7 +15,7 @@ $subnet = "192.168.102"
 $num_instances = 7
 $vm_memory = 1024
 $vm_cpus = 1
-$instance_name_prefix = "spark"
+$instance_name_prefix = "hadoop"
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for

@@ -9,4 +9,4 @@ groups:
 #    hosts: [node_00]
 
   - name: hadoop_alone
-    hosts: [node_03]
+    hosts: [node_06]

@@ -5,9 +5,6 @@
 group_default_vars: {}
 
 groups:
-#  - name: hadoop_alone
-#    hosts: [node_00]
-
   - name: hdfs_namenode
     hosts: [node_00]
   - name: hdfs_datanode
@@ -18,7 +15,7 @@ groups:
   - name: yarn_resource_mgr
     hosts: [node_02]
   - name: yarn_node_mgr
-    hosts: [node_03]
+    hosts: [node_03, node_04]
   - name: yarn_proxyserver
     hosts: [node_04]
   - name: yarn
@@ -27,7 +24,7 @@ groups:
   - name: mr_client
     hosts: [node_05]
   - name: mr_historyserver
-    hosts: [node_06]
+    hosts: [node_05]
   - name: mr
     children: [mr_client, mr_historyserver]
 
