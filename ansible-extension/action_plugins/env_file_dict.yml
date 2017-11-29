@@ -1,0 +1,36 @@
+---
+# os_family, name, release
+options:
+  system:
+    - etc_env
+    - etc_profd
+  user:
+    - pam_env
+    - profile
+    
+default:
+  system:
+    - etc_env
+  user:
+    - pam_env
+
+Debian:
+  default:
+    system:
+      - etc_env
+    user:
+      - pam_env
+  Ubuntu:
+    default:
+      comment: https://help.ubuntu.com/community/EnvironmentVariables#System-wide_environment_variables
+      system:
+        - etc_env
+      user:
+        - pam_env
+    trusty:
+      system:
+        - etc_env
+      user:
+        - pam_env
+        - profile
+
