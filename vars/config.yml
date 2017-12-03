@@ -3,10 +3,9 @@ resource_cache: "{{ lookup('env','HOME') }}/.resources"
 
 spark_group: spark
 spark_users:
+  - 'spark'
   - '{{ ansible_user }}'
   - 'andy'
-
-spark_deploy_zookeeper_dir: /var/lib/spark_zookeeper
 
 proxy:
   enable: false

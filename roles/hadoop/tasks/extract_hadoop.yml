@@ -7,7 +7,7 @@
         cached: "{{ resource_cache }}/{{ pkg_setting.file }}"
         url: "{{ pkg_setting.url }}"
         dest: '{{ pkg_setting.tmp_path }}'
-    - name: Present hadoop installation path - {{ pkg_setting.install_path }}
+    - name: Present Hadoop installation path - {{ pkg_setting.install_path }}
       file: path="{{ pkg_setting.install_path }}" state=directory
     - name: Unarchive package - {{ pkg_setting.install_path }}
       unarchive:
@@ -20,32 +20,16 @@
         dest: "{{ pkg_setting.hadoop_home }}"
         state: link
 
-- name: export HADOOP environment variables
-  block:
-    - name: export HADOOP_HOME, HADOOP_PREFIX ...
-      blockinfile:
-        path: /etc/environment
-        marker: "# {mark} HADOOP BLOCK"
-        block: |
-          HADOOP_VERSION={{ pkg_setting.version }}
-          HADOOP_HOME={{ pkg_setting.hadoop_home }}
-          HADOOP_PREFIX={{ pkg_setting.hadoop_home }}
-          HADOOP_HDFS_HOME={{ pkg_setting.hadoop_home }}
-          HADOOP_YARN_HOME={{ pkg_setting.hadoop_home }}
-          HADOOP_MAPRED_HOME={{ pkg_setting.hadoop_home }}
-    - name: export HADOOP_HOME, HADOOP_PREFIX ...
-      blockinfile:
-        path: "{{ sys_profile }}"
-        marker: "# {mark} HADOOP BLOCK"
-        block: |
-          export HADOOP_VERSION={{ pkg_setting.version }}
-          export HADOOP_HOME={{ pkg_setting.hadoop_home }}
-          export HADOOP_PREFIX={{ pkg_setting.hadoop_home }}
-          export HADOOP_HDFS_HOME={{ pkg_setting.hadoop_home }}
-          export HADOOP_YARN_HOME={{ pkg_setting.hadoop_home }}
-          export HADOOP_MAPRED_HOME={{ pkg_setting.hadoop_home }}
-    - name: export HADOOP_HOME to PATH
-      lineinfile:
-        dest: '{{ sys_profile }}'
-        line: 'export PATH=$HADOOP_HOME/bin:$PATH'
+- name: Export HADOOP_HOME, HADOOP_PREFIX ...
+  env_edit:
+    varlist:
+      - HADOOP_VERSION: "{{ pkg_setting.version }}"
+      - HADOOP_HOME: "{{ pkg_setting.hadoop_home }}"
+      - HADOOP_PREFIX: "{{ pkg_setting.hadoop_home }}"
+      - HADOOP_HDFS_HOME: "{{ pkg_setting.hadoop_home }}"
+      - HADOOP_YARN_HOME: "{{ pkg_setting.hadoop_home }}"
+      - HADOOP_MAPRED_HOME: "{{ pkg_setting.hadoop_home }}"
+      - PATH: $HADOOP_HOME/bin:$PATH
+    marker: "# {mark} HADOOP_HOME BLOCK"
+    profile_filename: hadoop.sh
 

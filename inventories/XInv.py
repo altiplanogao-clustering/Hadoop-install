@@ -21,11 +21,12 @@ except ImportError:
 
 class XInv(object):
 
-  def __init__(self, host_files = [], group_files = []):
+  def __init__(self, host_files = [], group_files = [], with_controller=False):
     # self.
     self.all_hosts = dict()
     self.all_groups = list()
     self.result = self._empty_inventory()
+    self.with_controller = with_controller
     self._load_resource( host_files , group_files )
     self._write_meta()
     self._write_groups()
@@ -91,14 +92,16 @@ class XInv(object):
 
   def _write_meta(self):
     hostvars = {}
-    hostvars["controller"] = {"ansible_connection": "local"}
+    if self.with_controller:
+      hostvars["controller"] = {"ansible_connection": "local"}
     for host_key in self.all_hosts:
       host = self.all_hosts[host_key]
       hostvars[host_key] = host.get("vars", {})
     self.result["_meta"] = {"hostvars": hostvars}
 
   def _write_groups(self):
-    self.result["local"] = {"hosts": ["controller"]}
+    if self.with_controller:
+      self.result["local"] = {"hosts": ["controller"]}
     for _group in self.all_groups:
       grp_name = _group["name"]
       group = {"children" : _group.get("children", []),

@@ -25,11 +25,9 @@
       register: keyscans
       loop_control:
         label: "{{ inventory_hostname }} scans {{ hostvars[item].hostname }}"
-      when: cluster_mode
     - name: Update known_hosts {{ ":" }} add hostnames
       lineinfile: dest=/home/{{ hadoop_conf.users.hadoop.name }}/.ssh/known_hosts create=yes state=present owner={{ hadoop_conf.users.hadoop.name }} group={{ hadoop_conf.group }} line="{{ item.stdout }}" regexp="^{{ hostvars[item.item].hostname }}"
       with_items: "{{ keyscans.results }}"
-      when: cluster_mode
       loop_control:
         label: "{{ hadoop_conf.users.hadoop.name }}@{{ item.item }}"
     - name: Copy known_hosts, from {{ hadoop_conf.users.hadoop.name }} to hdfs, yarn, mapred

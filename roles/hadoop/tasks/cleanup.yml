@@ -1,20 +1,20 @@
 ---
 
-- name: Kill java
+- name: (Cleanup) Kill java
   shell: pkill java
   failed_when: false
   ignore_errors: True
 
-- name: Delete hadoop installation
+- name: (Cleanup) Delete hadoop installation
   file: path="{{ item }}" state=absent
   with_items:
     - "{{ pkg_setting.hadoop_path }}"
     - "{{ pkg_setting.hadoop_home }}"
   when: fresh_unzip | default(true)
-- name: Delete hadoop_conf_dir - {{ hadoop_conf.hadoop_conf_dir }}
+- name: (Cleanup) Delete Hadoop configuration - {{ hadoop_conf.hadoop_conf_dir }}
   file: path="{{ hadoop_conf.hadoop_conf_dir }}" state=absent
   when: fresh_unzip | default(true)
-- name: Delete hadoop-data
+- name: (Cleanup) Delete Hadoop Data & Log
   file: path="{{ item }}" state=absent
   when: drop_data | default(true)
   with_items:

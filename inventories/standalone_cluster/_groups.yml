@@ -5,9 +5,18 @@
 group_default_vars: {}
 
 groups:
-  - name: masters
+  - name: spark_masters
     hosts: [node_00]
-  - name: slaves
+  - name: spark_slaves
     hosts: [node_01, node_02]
   - name: spark_nodes
-    children: [masters, slaves]
+    children: [spark_masters, spark_slaves]
+
+  - name: history_server_runner
+    hosts: [node_01]
+    vars:
+      spark_run_history_server: True
+  - name: demo_runner
+    hosts: [node_02]
+    vars:
+      spark_run_demo: True

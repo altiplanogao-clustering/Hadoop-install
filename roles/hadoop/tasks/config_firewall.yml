@@ -1,6 +1,7 @@
 ---
 
-- service:
+- name: Stop firewall
+  service:
     name: firewalld.service
     state: stopped
     enabled: no

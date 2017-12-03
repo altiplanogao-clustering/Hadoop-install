@@ -5,7 +5,7 @@
 standalone:
 	single
 	cluster
-	ha-cluster
+	cluster-ha
 
 yarn
 
@@ -20,4 +20,4 @@ standalone:		true/false
 when standalone == true, 3 modes:
 				single
 				cluster
-				ha-cluster			
+				cluster-ha

@@ -12,27 +12,27 @@ This project contains ansible playbooks to install Hadoop cluster.
 * Start Hadoop single node cluster
 
   ```
-  ansible-playbook -i inventories/hadoop-single hadoop-single.yaml
+  ansible-playbook -i inventories/hadoop-single hadoop.yaml
   ```
 
   | Node type          | Web UI                       |
   | ------------------ | ---------------------------- |
-  | namenode:          | http://192.168.102.106:50070 |
-  | datanode:          | http://192.168.102.106:50075 |
-  | resourcemanager:   | http://192.168.102.106:8088  |
-  | nodemanager:       | http://192.168.102.106:8042​ |
-  | job historyserver: | http://192.168.102.106:19888 |
+  | namenode:          | http://192.168.102.100:50070 |
+  | datanode:          | http://192.168.102.100:50075 |
+  | resourcemanager:   | http://192.168.102.100:8088  |
+  | nodemanager:       | http://192.168.102.100:8042  |
+  | job historyserver: | http://192.168.102.100:19888 |
 
 * Start Hadoop cluster
 
   ```
-  ansible-playbook -i inventories/hadoop hadoop-cluster.yaml
+  ansible-playbook -i inventories/hadoop hadoop.yaml
   ```
 
   | Node type          | Web UI                                   |
   | ------------------ | ---------------------------------------- |
   | namenode:          | http://192.168.102.100:50070             |
-  | datanode:          | http://192.168.102.101:50075             |
+  | datanode:          | http://192.168.102.101:50075<br/>http://192.168.102.103:50075 |
   | resourcemanager:   | http://192.168.102.102:8088              |
   | nodemanager:       | http://192.168.102.103:8042 <br/>http://192.168.102.104:8042 |
   | job historyserver: | http://192.168.102.105:19888             |

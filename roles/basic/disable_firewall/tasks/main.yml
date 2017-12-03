@@ -5,4 +5,12 @@
     name: firewalld
     enabled: no
     state: stopped
+  ignore_errors: true
+
+- name: stop ufw service
+  service: 
+    name: ufw
+    enabled: no
+    state: stopped
+  ignore_errors: true
 

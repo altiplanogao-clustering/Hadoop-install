@@ -13,44 +13,42 @@
     dest: "{{ pkg_ic.install_path }}"
     remote_src: yes
 
-
-- name: Present zookeeper_data_dir - {{ zookeeper_data_dir }}
-  file: path="{{ zookeeper_data_dir }}" state=directory mode=0777
-- name: Zoo.cfg
-  template:
-    src: zoo.cfg
-    dest: "{{ pkg_ic.install_path }}/{{ pkg_ic.basename }}/conf/zoo.cfg"
-    mode: 0644
-- name: Config Zk myid
-  template:
-    src: myid
-    dest: "{{ zookeeper_data_dir }}/myid"
-    mode: 0664
+- name: Config zookeeper
+  block:
+    - name: Present zookeeper_data_dir - {{ zookeeper_data_dir }}
+      file: path="{{ zookeeper_data_dir }}" state=directory mode=0777
+    - name: Zoo.cfg
+      template:
+        src: zoo.cfg
+        dest: "{{ pkg_ic.install_path }}/{{ pkg_ic.basename }}/conf/zoo.cfg"
+        mode: 0644
+    - name: Config Zk myid
+      template:
+        src: myid
+        dest: "{{ zookeeper_data_dir }}/myid"
+        mode: 0664
 
 # export environment variable
-- name: Export ZOOKEEPER_HOME (/etc/environment)
-  lineinfile:
-    path: /etc/environment
-    regexp: '^ZOOKEEPER_HOME='
-    line: 'ZOOKEEPER_HOME={{ pkg_ic.install_path }}/{{ pkg_ic.basename }}'
 - name: Export ZOOKEEPER_HOME
-  lineinfile:
-    path: "{{ sys_profile }}"
-    regexp: '^export ZOOKEEPER_HOME='
-    line: 'export ZOOKEEPER_HOME={{ pkg_ic.install_path }}/{{ pkg_ic.basename }}'
-- name: Export ZOOKEEPER_HOME to PATH
-  lineinfile:
-    path: '{{ sys_profile }}'
-    line: 'export PATH=$PATH:$ZOOKEEPER_HOME/bin'
+  env_edit:
+    varlist:
+      - ZOOKEEPER_HOME: "{{ pkg_ic.install_path }}/{{ pkg_ic.basename }}"
+      - PATH: $ZOOKEEPER_HOME/bin:$PATH
+    marker: "{mark} ZOOKEEPER BLOCK"
+    profile_filename: zookeeper.sh
 
-
-
-- template:
-    src: zookeeperd
-    dest: "/etc/rc.d/init.d//zookeeperd"
-    mode: 0755
-
-- service:
-    name: zookeeperd
-    state: restarted
-    enabled: yes
+- name: Setup zookeeper service
+  block:
+    - template:
+        src: zookeeperd
+        dest: "/etc/init.d/zookeeperd"
+        mode: 0755
+    # - file:
+    #     src: "/etc/init.d/zookeeperd"
+    #     dest: "/etc/rc0.d/K99zookeeperd"
+    #     mode: 0755
+    #     state: link
+    - service:
+        name: zookeeperd
+        state: restarted
+        enabled: yes

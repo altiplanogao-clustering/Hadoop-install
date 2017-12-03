@@ -4,13 +4,19 @@ deploy_mode: standalone
 
 fresh_unzip: true
 with_hadoop: false
-standalone: false
 start_on_finish: true
-
-spark_conf_dir: /etc/spark/conf
 
 spark_group: spark
 spark_users:
+  - spark
   - '{{ ansible_user }}'
 
-spark_deploy_zookeeper_dir: /var/lib/spark_zookeeper
+spark_conf:
+  install_dir: /opt
+  home: /opt/spark
+  conf_dir: /etc/spark/conf
+  deploy_zookeeper_dir: /var/lib/spark_zookeeper
+  script_dir: /aspark_script
+  eventlog_enable: True
+  eventlog_local_dir: /tmp/spark-events
+  eventlog_remote_dir: /spark_eventlog

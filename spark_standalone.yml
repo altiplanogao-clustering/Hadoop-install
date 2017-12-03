@@ -1,7 +1,7 @@
 ---
 
 - name: Pre-setup
-  hosts: spark_nodes:zk
+  hosts: spark_nodes:spark_nodes:zk
   become: yes
   become_method: sudo
   vars_files:
@@ -25,4 +25,4 @@
     # - basic/hosts
     # - basic/sources
     # - jdk
-    - { role: spark, with_hadoop: true, standalone: true, fresh_unzip: false }
+    - { role: spark, with_hadoop: true, deploy_mode: "standalone", fresh_unzip: false }

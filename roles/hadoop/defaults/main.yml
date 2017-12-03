@@ -1,6 +1,5 @@
 ---
 
-cluster_mode: false
 drop_data: false
 fresh_unzip: true
 start_on_finish: true
@@ -16,3 +15,13 @@ pkg_ic:
   file: hadoop-2.8.2.tar.gz
   basename: hadoop-2.8.2
   version: 2.8.2
+
+hadoop_client_conf:
+  users:
+    demo_runner:
+      name: andy
+      id: 3001
+    spark:
+      name: spark
+      id: 3002
+
